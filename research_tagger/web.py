@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import json
+import shutil
 import sqlite3
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -88,13 +89,21 @@ def ris_text(records: list[dict], config: ConferenceConfig, tagging: TaggingConf
 
 
 def create_app(database_path: Path | None = None, domains_path: Path | None = None) -> FastAPI:
-    """Build a local-only app with SQLite persistence and one background worker."""
+    """Build the app; seed a missing default database from the bundled snapshot.
+
+    Explicit database paths start empty when missing. Existing databases are
+    always reused. A missing bundled snapshot fails default first startup.
+    """
     root = Path(__file__).resolve().parent.parent
     db = Database(database_path or root / "data" / "research-tagger.sqlite3")
     service = JobService(db)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        if database_path is None and not db.path.exists():
+            with (root / "dataset" / "research-tagger.sqlite3").open("rb") as source:
+                with db.path.open("xb") as destination:
+                    shutil.copyfileobj(source, destination)
         db.initialize(domains_path or root / "domains.json")
         yield
         service.close()

@@ -13,6 +13,8 @@ The default URL is `http://127.0.0.1:8000`. This application binds only to the l
 
 SQLite stores data in `data/research-tagger.sqlite3`, using WAL mode and foreign keys. For backups, stop the app and copy the database. While it is running, the `-wal` and `-shm` companion files may contain active data; do not copy only the main file as a live backup. Run one app process per database. There is one job coordinator, with a bounded request pool for conference tagging and progress committed after every paper. Browser reloads do not interrupt it.
 
+On first launch with the default database path, `create_app(database_path: Path | None = None, domains_path: Path | None = None)` copies `dataset/research-tagger.sqlite3` into the missing working database before initialization. The bundled snapshot stays unchanged, and existing local databases are never replaced or merged. If the snapshot is missing, first startup fails explicitly. Passing `--database` opts out of seeding; a missing explicit database starts empty. The dataset README documents the snapshot's contents, provenance and rights.
+
 ## Field help
 
 Every editable field has a **?** beside its label. Hover or keyboard-focus the button to read what the field does; click or tap to keep the explanation open. Click it again, click outside, move keyboard focus away, or press Escape to close it. Only one explanation is open at a time. Escape dismisses help before closing an enclosing dialog. Help buttons do not submit forms or change settings.

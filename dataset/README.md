@@ -18,12 +18,10 @@ From the project root, after cloning the repository:
 
 ```sh
 uv sync
-mkdir -p data
-cp -n dataset/research-tagger.sqlite3 data/research-tagger.sqlite3
 uv run research-tagger-web
 ```
 
-Open http://127.0.0.1:8000. Stop the server with Ctrl+C. The copy command does not overwrite an existing local database. On a fresh installation, it seeds the app with the snapshot; subsequent scraping, settings changes and tagging are saved only to the working copy under `data/`.
+Open http://127.0.0.1:8000. Stop the server with Ctrl+C. On first launch, the app automatically copies this snapshot to `data/research-tagger.sqlite3`. No manual import is needed. Subsequent scraping, settings changes and tagging are saved only to that working copy. Existing databases are never replaced or merged with a newer snapshot when restarting or updating the project. An explicit `--database` path bypasses automatic seeding and creates an empty database if that path does not exist.
 
 Browsing saved papers and classifications does not require a TypeSafe key. New tagging requests require your own key and incur API charges. The app shows results matching the current tagging configuration; changing the prompt, selected tags or paper text can make previously saved results outdated.
 

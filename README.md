@@ -17,7 +17,7 @@ git clone https://github.com/eyad-al-shami/PaperRadar.git
 cd PaperRadar
 ```
 
-To start with the collected papers and saved classifications, follow the [included dataset instructions](dataset/README.md). Otherwise, the commands below start with your existing local database or create an empty one.
+On first launch, the app automatically loads the bundled dataset: **19,327 paper records and 25,933 saved tagging results**. No manual import or API key is needed to browse them. Existing local databases are preserved. See [dataset details](dataset/README.md) for coverage and provenance.
 
 The app code and project documentation are available under the [MIT license](LICENSE). The bundled SQLite dataset is excluded from that software license; paper text retains its original rights. See the [dataset contents and rights notice](dataset/README.md#source-attribution-and-rights).
 

@@ -186,6 +186,61 @@ class EstimateTests(unittest.TestCase):
             self.assertNotIn("criteria", question)
 
 
+class BundledDatasetTests(unittest.TestCase):
+    """Exercise first-launch seeding without touching the user's working library."""
+
+    def setUp(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        self.root = Path(temp.name)
+        package = self.root / "research_tagger"
+        package.mkdir()
+        (package / "static").symlink_to(ROOT / "research_tagger" / "static", target_is_directory=True)
+        (self.root / "domains.json").write_bytes((ROOT / "domains.json").read_bytes())
+        self.snapshot = Database(self.root / "dataset" / "research-tagger.sqlite3")
+        self.snapshot.initialize(self.root / "domains.json")
+        config = ConferenceSelection(**CONFERENCE).to_config()
+        self.snapshot.execute("INSERT INTO conferences(id,config) VALUES (1,?)", (config.model_dump_json(),))
+        self.snapshot.execute("INSERT INTO papers(id,conference_id,title,abstract,source_url) VALUES (1,1,?,?,?)",
+                              (paper()["title"], paper()["abstract"], paper()["source_url"]))
+        tagging = self.snapshot.settings()
+        self.probabilities = {domain.id: 0.9 for domain in tagging.domains}
+        request_signature = signature(payload_for(self.snapshot.papers(1)[0], config, tagging))
+        self.snapshot.execute(
+            "INSERT INTO tag_results(paper_id,signature,probabilities,model,input_tokens,output_tokens,cost_usd,created_at) "
+            "VALUES (1,?,?,?,100,1,0.01,?)",
+            (request_signature, json.dumps(self.probabilities), tagging.model, now()),
+        )
+        patched_file = patch("research_tagger.web.__file__", str(package / "web.py"))
+        patched_file.start()
+        self.addCleanup(patched_file.stop)
+
+    def test_first_launch_shows_saved_papers_and_tags_and_restart_preserves_edits(self):
+        original = self.snapshot.path.read_bytes()
+        app = create_app()
+        with TestClient(app) as client:
+            response = client.get("/api/papers/1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()["title"], paper()["title"])
+            self.assertEqual(response.json()["probabilities"], self.probabilities)
+            app.state.db.execute("UPDATE papers SET title='Local edit' WHERE id=1")
+        with TestClient(create_app()) as client:
+            self.assertEqual(client.get("/api/papers/1").json()["title"], "Local edit")
+        self.assertEqual(self.snapshot.path.read_bytes(), original)
+
+    def test_explicit_database_starts_empty(self):
+        app = create_app(self.root / "custom.sqlite3")
+        with TestClient(app):
+            self.assertEqual(app.state.db.rows("SELECT * FROM papers"), [])
+
+    def test_missing_snapshot_fails_without_creating_an_empty_default_database(self):
+        self.snapshot.path.unlink()
+        app = create_app()
+        with self.assertRaises(FileNotFoundError), TestClient(app):
+            pass
+        self.assertFalse(app.state.db.path.exists())
+
+
 class WebTests(unittest.TestCase):
     def setUp(self):
         environment = patch.dict(os.environ)
