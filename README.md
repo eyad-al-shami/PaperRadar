@@ -29,6 +29,34 @@ Keep the terminal open while using the app. Press **Ctrl+C** to stop it. To star
 
 Your changes are saved locally in `data/research-tagger.sqlite3`. Restarting or updating the app preserves your existing database. PDFs are linked, not bundled.
 
+## Add a research tag
+
+1. Open **Settings → Tagging settings → Research tags** and click **＋ Add tag**.
+2. Enter a **Tag name** and **Definition and inclusion criteria** using the guide below.
+3. Optionally use **Test this prompt**: select a conference and **1–10 papers**, click **Test prompt**, and review the estimated cost before confirming. Tests use the current form values, incur API charges, and do not save paper tags.
+4. Click **Save tagging settings**. Tag definitions and the shared prompt apply across conferences.
+5. Return to a conference, open **Tag conference papers → Tags to apply**, select the new tag, then click **Tag papers** and confirm the estimated cost.
+
+| Field | What it means |
+| --- | --- |
+| **Tag name** | The name shown in paper tags and filters, such as **World models**. It is also sent to the model. |
+| **Definition and inclusion criteria** | Explains what qualifies for this tag. Describe the research focus, what to include, and closely related work to exclude. The model receives this text with each paper; it directly guides classification. |
+| **Advanced → Stable ID** | An automatically generated, read-only identifier connecting the tag to saved results. Renaming a tag does not change its ID. |
+| **Tag probability threshold** | A shared cutoff for assigning all tags. For example, `0.70` means a probability of at least 70%. Changing only this cutoff reuses saved probabilities without new model calls. |
+| **Tagging prompt → Question / instructions** | The shared question sent for every selected tag, alongside that tag's name and definition. `{fields}` becomes the selected paper sections, such as “title and abstract”. |
+
+For example, a **World models** definition could be:
+
+> Include papers that learn environment dynamics to predict future states or support planning and control. The learned dynamics should be a substantive contribution. Exclude papers that only generate images without modeling environment dynamics.
+
+Saving changes does not start tagging automatically. Changes to a tag's name, definition, or the shared prompt can make saved results outdated for the new request; re-tagging requires new paid calls. The previous results remain stored.
+
+## Zotero
+
+**RIS export:** choose **Export to Zotero → Download matching papers (.RIS)**, then import the file into Zotero. The export covers all matching papers across pages and uses the saved PDF link as the item URL so Zotero's **Find Full Text** can try it. No PDF file or attachment (`L1`) field is exported. Conference and arXiv page links are preserved in notes; when no PDF link is saved, the item URL uses the arXiv page if available, otherwise the conference page. Re-importing does not update existing Zotero items automatically.
+
+**Zotero Connector:** open **Export to Zotero → Connector setup and help** (also available in Settings) to download and install the custom translator. The browser extension can then save the open paper dialog or choose from all papers matching your list filters, with Zotero downloading PDFs directly from saved URLs. See [setup and usage](docs/ZOTERO.md).
+
 ## More information
 
 - [App settings and detailed usage](docs/WEB.md)
