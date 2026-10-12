@@ -1,0 +1,12 @@
+[
+  {
+    "id": "interpretability_explainability",
+    "label": "Interpretability and explainability",
+    "description": "Methods or evaluations whose main contribution explains model predictions, reveals how learned representations or internal mechanisms work, or measures the faithfulness and usefulness of model explanations. Merely describing a method or visualizing results is not sufficient."
+  },
+  {
+    "id": "world_models",
+    "label": "World models",
+    "description": "Learning models of environment dynamics that predict future states or observations, including action-conditioned simulation and models used for planning or control. Static scene reconstruction, recognition, and generic image generation alone are not sufficient."
+  }
+]

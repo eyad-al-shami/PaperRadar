@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Collect, inspect, and tag conference research papers.">
+  <title>PaperRadar</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <script id="research-tagger-zotero" type="application/json">null</script>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="PaperRadar home"><span class="brand-mark">P<span>·</span></span><span>Paper<br><strong>Radar</strong></span></a>
+    <div class="rail-label">YOUR LIBRARY</div>
+    <nav id="conference-nav" aria-label="Conferences"></nav>
+    <button id="add-conference" class="rail-add">＋ Add conference</button>
+    <div class="rail-bottom"><button id="settings-button">⚙ &nbsp; Settings</button><span class="local-dot">Local workspace</span></div>
+  </aside>
+  <main>
+    <div id="notice" role="status" hidden></div>
+    <div id="dashboard">
+      <header class="page-header"><div><div class="eyebrow">CONFERENCE WORKSPACE</div><h1 id="conference-title">Your research library</h1><p id="conference-meta">Choose a conference to start collecting papers.</p></div><span class="service-badge">API <span id="key-status">not connected</span></span></header>
+      <section id="empty-library" class="empty" hidden><span class="empty-symbol">▤</span><h2>A home for your conference papers</h2><p>Add a conference, collect its papers, and find the research that belongs to your tags.</p><button id="empty-add" class="primary">Add your first conference</button></section>
+      <div id="conference-content" hidden>
+        <details id="scraping-overview" class="overview-panel">
+          <summary><span><strong>Scrape conference papers</strong><small id="scrape-summary">Refresh the index and collect missing content</small></span><span class="overview-state" aria-hidden="true"></span></summary>
+          <div class="overview-content">
+            <section class="stats-grid scrape-stats" aria-label="Scraping statistics" id="scrape-stats"></section>
+            <section class="collection overview-section">
+              <p id="coverage-text" class="fine-print"></p>
+              <div class="coverage-bar" id="coverage-bar" role="img" aria-label="Scraping coverage"></div>
+              
+              <div class="collection-options">
+                <button id="scrape-button" class="primary">Scrape papers</button>
+                <div id="field-selection-picker" class="domain-picker">
+                  <button id="field-selection" type="button" aria-label="Text used for tagging" aria-expanded="false" aria-controls="field-selection-panel"><span id="field-selection-label">Sections</span><span id="field-selection-count" class="domain-filter-count">2 selected</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+                  <div id="field-selection-panel" class="domain-filter-panel" hidden>
+                    <div id="field-selection-options" role="group" aria-label="Text sections to use">
+                      <label class="domain-filter-option"><input type="checkbox" name="field" value="title" checked><span>Title</span></label>
+                      <label class="domain-filter-option"><input type="checkbox" name="field" value="abstract" checked><span>Abstract</span></label>
+                      <label class="domain-filter-option"><input type="checkbox" name="field" value="introduction"><span>Introduction <small>via arXiv TeX</small></span></label>
+                    </div>
+                    <div class="domain-filter-footer">Changes save automatically</div>
+                  </div>
+                </div>
+              </div>
+              <p id="field-selection-status" class="fine-print" role="status" aria-live="polite"></p>
+              <p class="fine-print">Scraping refreshes the paper index, then collects missing titles, abstracts, and PDF links. Saved content is kept. Introduction is also collected when selected. PDF files are not downloaded.</p><div id="job-progress" class="job-progress" hidden></div>
+            </section>
+          </div>
+        </details>
+        <details id="tagging-overview" class="overview-panel">
+          <summary><span><strong>Tag conference papers</strong><small id="tag-summary">Choose tags and review the estimate</small></span><span class="overview-state" aria-hidden="true"></span></summary>
+          <div class="overview-content">
+            <section class="pricing-summary overview-section">
+              <div class="tagging-actions">
+                <button id="tag-button" class="primary">Tag papers</button>
+                <div id="tag-selection-picker" class="domain-picker">
+                  <button id="tag-selection" type="button" aria-label="Tags to apply" aria-expanded="false" aria-controls="tag-selection-panel"><span id="tag-selection-label">Tags to apply</span><span id="tag-selection-count" class="domain-filter-count" hidden></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+                  <div id="tag-selection-panel" class="domain-filter-panel" hidden>
+                    <div class="domain-filter-search"><input id="tag-selection-search" type="search" placeholder="Search tags…" aria-label="Search tags to apply" autocomplete="off"></div>
+                    <div id="tag-domain-options" role="group" aria-label="Tags to apply"></div>
+                    <p id="tag-selection-empty" hidden>No matching tags.</p>
+                    <div class="domain-filter-footer"><span>Choose tags to apply</span><button id="clear-tag-selection" type="button">Clear all</button></div>
+                  </div>
+                </div>
+                <div class="pricing-stat"><span>Evaluated</span><strong id="tagged-count">0</strong></div>
+                <div class="pricing-stat"><span>Papers awaiting tagging</span><strong id="tag-ready-count">0</strong></div>
+                <div class="pricing-stat"><span>Estimated input</span><strong id="tag-token-count">0 tokens</strong></div>
+                <div class="pricing-stat price"><span>Estimated price</span><strong id="estimated-cost">$0.000000</strong></div>
+              </div>
+              <p id="tag-selection-error" class="form-error" role="alert"></p>
+              <div id="tag-job-progress" class="job-progress tagging-job-progress" hidden></div>
+              <details class="tag-domain-summary"><summary>Papers by selected tag</summary><p class="muted">Papers may belong to more than one tag.</p><div id="domain-stats"></div></details>
+            </section>
+          </div>
+        </details>
+        <section class="panel papers-panel">
+          <div class="section-heading"><div><h2>Papers</h2><p id="papers-count"></p></div><div class="paper-controls filters"><input id="paper-search" type="search" placeholder="Search paper titles…" aria-label="Search paper titles"><select id="status-filter" aria-label="Filter paper status"><option value="all">All statuses</option><option value="pending">Pending</option><option value="failed">Needs attention</option><option value="scraped">Awaiting evaluation</option><option value="tagged">Evaluated</option></select><div id="domain-picker" class="domain-picker">
+                <button id="domain-filter" type="button" aria-label="Filter papers by tags" aria-expanded="false" aria-controls="domain-filter-panel"><span id="domain-filter-label">All tags</span><span id="domain-filter-count" class="domain-filter-count" hidden></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+                <div id="domain-filter-panel" class="domain-filter-panel" hidden>
+                  <div class="domain-filter-search"><input id="domain-filter-search" type="search" placeholder="Search tags…" aria-label="Search tags" autocomplete="off"></div>
+                  <div id="domain-filter-options" role="group" aria-label="Filter tags" aria-describedby="domain-filter-hint"></div>
+                  <p id="domain-filter-empty" hidden>No matching tags.</p>
+                  <div class="domain-filter-footer"><span id="domain-filter-hint">Match all selected tags</span><button id="clear-domain-filter" type="button">Clear all</button></div>
+                </div>
+              </div><details class="export-menu"><summary class="button-link">Export to Zotero</summary><div class="export-menu-panel"><a id="export-zotero" class="button-link" download>Download matching papers (.RIS)</a><p>Or use Zotero Connector in your browser toolbar to select and save matching papers.</p><button type="button" data-zotero-help>Connector setup and help</button></div></details></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Paper</th><th>Collection</th><th>Status</th><th>Tags</th></tr></thead><tbody id="paper-rows"></tbody></table></div>
+          <div id="paper-empty" class="table-empty" hidden>No papers match this view.</div><footer class="pagination"><button id="previous-page">← Previous</button><span id="page-label"></span><button id="next-page">Next →</button></footer>
+        </section>
+      </div>
+    </div>
+    <section id="settings-view" hidden>
+      <header class="page-header"><div><div class="eyebrow">WORKSPACE</div><h1>Settings</h1><p>Conference sources, tagging prompt, research tags, and connection.</p></div><button id="back-library">← Back to library</button></header>
+      <details class="panel settings-panel"><summary>Conferences</summary><p class="muted">Choose ICML, ECCV, ICLR, CVPR, ICCV, or NeurIPS and a year. The official paper URL is filled in automatically.</p><div id="settings-conferences"></div></details>
+      <section class="panel settings-panel"><h2>TypeSafe connection</h2><p id="connection-state"></p><form id="key-form" class="inline-form"><label>API key<input type="password" id="api-key" autocomplete="off" required placeholder="Enter your TypeSafe API key"></label><button class="primary">Connect</button></form><p class="fine-print">The key stays in this server’s memory until it restarts. It is never stored in the database. You can also set TYPESAFE_API_KEY before starting the app.</p></section>
+      <section class="panel settings-panel"><h2>Zotero</h2><p>Export matching papers as RIS or save them with the browser Connector.</p><button type="button" data-zotero-help>Connector setup and help</button></section>
+      <form id="tagging-form" class="panel settings-panel" novalidate><h2>Tagging settings</h2><h3>Research tags</h3><div id="domain-editors"></div><button id="add-domain" type="button">＋ Add tag</button><div class="form-grid"><label>Tag probability threshold<input id="tag-threshold" type="number" min="0" max="1" step="0.01" required></label></div>
+        <h3>Tagging prompt</h3><p id="prompt-help" class="muted">Used for every tag alongside its name, definition, and the selected paper text. <code>{fields}</code> becomes the selected sections, such as “title and abstract”.</p>
+        <div class="form-grid"><label class="full-width">Question / instructions<textarea id="prompt-question" rows="5" required aria-describedby="prompt-help"></textarea></label></div>
+        <p class="fine-print">Saving applies to all conferences and updates token estimates. Tags made with a different prompt become outdated; papers can then be tagged again.</p>
+        <section class="prompt-test-box" aria-labelledby="prompt-test-title">
+          <div class="section-heading"><div><h3 id="prompt-test-title">Test this prompt</h3><p>Try the current form values on a small sample before saving. Test results are temporary and do not become paper tags.</p></div></div>
+          <div class="prompt-test-controls"><label>Conference<select id="prompt-test-conference" required></select></label><label>Number of papers<input id="prompt-test-count" type="number" min="1" max="10" step="1" value="2" required></label><button id="preview-prompt-test" type="button" class="primary">Test prompt</button></div>
+          <p id="prompt-test-error" class="form-error" role="alert"></p>
+          <div id="prompt-test-results" class="prompt-test-results" hidden></div>
+        </section>
+        <details class="advanced-settings"><summary>Advanced: model, performance and pricing</summary><div class="form-grid"><label>Model<input id="model-name" required></label><label>Parallel requests<input id="parallel-requests" type="number" min="1" max="16" step="1" value="4" required></label><label>USD per million input tokens<input id="token-price" type="number" min="0" step="0.001" required></label><label>Price checked on<input id="pricing-date" type="date" required></label></div><p class="fine-print"><a href="https://docs.typesafe.ai/models" target="_blank" rel="noreferrer">TypeSafe’s pricing</a> lists $0.042 per million input tokens for the default model, with free output tokens, checked September 22, 2026. Check pricing when changing models.</p>
+</details><p id="tagging-form-error" class="form-error" role="alert"></p><div class="form-footer"><button class="primary">Save tagging settings</button></div>
+      </form>
+    </section>
+  </main>
+  <dialog id="conference-dialog"><form id="conference-form"><div class="dialog-heading"><h2 id="conference-form-title">Add conference</h2><button type="button" data-close="conference-dialog" class="icon-button" aria-label="Close">×</button></div><div class="form-grid"><label>Conference<select id="conference-name" required></select></label><label>Year<select id="conference-year" required></select></label><label class="full-width">Paper index URL<input id="conference-url" type="url" readonly></label></div><p id="conference-edition-note" class="fine-print"></p><p class="fine-print">Scraping first checks this edition’s paper index, then collects missing content. Starts with title and abstract; you can select introductions in the conference workspace.</p><p id="conference-form-error" class="form-error" role="alert"></p><div class="form-footer"><button type="button" data-close="conference-dialog">Cancel</button><button id="save-conference" class="primary">Save conference</button></div></form></dialog>
+  <dialog id="paper-dialog" class="paper-dialog"><div class="dialog-heading"><span class="eyebrow">PAPER DETAILS</span><button data-close="paper-dialog" class="icon-button" aria-label="Close">×</button></div><div id="paper-detail"></div></dialog>
+  <dialog id="zotero-dialog" class="paper-dialog"><div class="dialog-heading"><h2>Save with Zotero Connector</h2><button data-close="zotero-dialog" class="icon-button" aria-label="Close">×</button></div>          <div class="zotero-setup">
+            <p>This connects three things: <strong>PaperRadar</strong> in this tab, the <strong>Zotero desktop app</strong>, and the <strong>Zotero Connector browser extension</strong>. The translator is a small file that teaches the extension how to read our papers.</p>
+            <h3>Install once · Mac and Chrome</h3>
+            <ol class="zotero-steps">
+              <li><strong>Open Zotero and check the browser extension.</strong><p>Open the Zotero desktop app. In Chrome, click the puzzle-piece Extensions icon beside the address bar. Find <strong>Zotero Connector</strong> and pin it so its button stays visible. If it is missing, install it from <a href="https://www.zotero.org/download/" target="_blank" rel="noreferrer">Zotero’s download page</a>.</p></li>
+              <li><strong>Download the translator from this app.</strong><p><a class="button-link" href="/static/zotero/Research%20Tagger.js" download="Research Tagger.js">Download Research Tagger.js</a></p><p>The file goes into your browser’s download folder, usually <strong>Downloads</strong>. Leave it as <code>Research Tagger.js</code>; you will copy it in the next step.</p></li>
+              <li><strong>Copy the file into Zotero’s translators folder.</strong><p>Switch to the Zotero desktop app. In the Mac menu bar, choose <strong>Zotero → Settings → Advanced</strong>. Find <strong>Files and Folders → Show Data Directory</strong>. Finder opens a folder; open its <code>translators</code> subfolder. Copy <code>Research Tagger.js</code> from Downloads into that subfolder.</p><p class="fine-print">Expected result: Research Tagger.js sits alongside other .js files. This file is installed by copying it, not through Zotero’s Import command.</p></li>
+              <li><strong>Quit and reopen Zotero.</strong><p>In Zotero, press <strong>⌘Q</strong>, then open Zotero again. Keep it running for the remaining steps.</p></li>
+              <li><strong>Reload translators in the Chrome extension.</strong><p>Return to Chrome. Right-click the Zotero Connector toolbar button → <strong>Options</strong> (or <strong>Preferences</strong>) → <strong>Advanced → Reset Translators</strong>. This reloads the extension’s translator list; it does not delete your Zotero papers. Then return to PaperRadar and refresh this tab with <strong>⌘R</strong>.</p></li>
+              <li><strong>Check that PaperRadar is recognized.</strong><p>Open a conference that has papers. Hover over the Zotero Connector toolbar button: its tooltip should mention <strong>PaperRadar</strong>. If it only says <strong>Web Page</strong>, repeat steps 3–5 and check that Zotero desktop is open.</p></li>
+            </ol>
+            <h3>Save a paper or a batch</h3>
+            <div class="zotero-save-options">
+              <div><h4>One paper</h4><p>Click a paper title to open its dialog. Leave the dialog open, then click <strong>Zotero Connector in Chrome’s toolbar</strong>. Zotero saves that paper and attempts to attach its PDF.</p></div>
+              <div><h4>Several papers</h4><p>Close the paper dialog. Set your search, status, and tag filters, then click <strong>Zotero Connector in Chrome’s toolbar</strong>. In its selection window, check the papers you want and confirm. All matching pages are included.</p></div>
+            </div>
+            <p><strong>Check your first save:</strong> switch to Zotero and expand the new paper using the arrow beside its title. A successful PDF download appears as a child attachment; double-click it to open it.</p>
+            <p class="fine-print">If the record saves without a PDF, check that the paper has a working PDF link here and that Zotero Settings → General → “Automatically attach associated PDFs and other files when saving items” is enabled. Papers marked [no PDF link] save metadata only. Saving again can create duplicates.</p>
+            <p class="fine-print">Using another browser or operating system? The same translator file is used. Open that browser’s Connector preferences and Zotero’s Advanced settings; menu names may vary. <a href="https://www.zotero.org/support/zotero_data" target="_blank" rel="noreferrer">Find your Zotero data directory</a>.</p>
+          </div>
+</dialog>
+  <dialog id="tag-dialog"><div class="dialog-heading"><h2>Start tagging</h2><button data-close="tag-dialog" class="icon-button" aria-label="Close">×</button></div><p id="tag-confirmation"></p><p class="fine-print">This sends the selected paper fields and only the checked research tags to TypeSafe. The shared prompt text stays unchanged.</p><div class="form-footer"><button data-close="tag-dialog">Cancel</button><button id="confirm-tag" class="primary">Start tagging</button></div></dialog>
+  <dialog id="prompt-test-dialog"><div class="dialog-heading"><h2>Run prompt test</h2><button data-close="prompt-test-dialog" class="icon-button" aria-label="Close">×</button></div><p id="prompt-test-confirmation"></p><p class="fine-print">This sends the selected papers and the current unsaved prompt/tag form values to TypeSafe. Results are displayed temporarily and are not saved as paper tags.</p><div class="form-footer"><button data-close="prompt-test-dialog">Cancel</button><button id="confirm-prompt-test" class="primary">Run test</button></div></dialog>
+</body>
+</html>
