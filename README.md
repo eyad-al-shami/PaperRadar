@@ -29,7 +29,7 @@ Keep the terminal open while using the app. Press **Ctrl+C** to stop it. To star
 
 Your changes are saved locally in `data/research-tagger.sqlite3`. Restarting or updating the app preserves your existing database. PDFs are linked, not bundled.
 
-## Add a research tag
+## Add a new tag
 
 1. Open **Settings → Tagging settings → Research tags** and click **＋ Add tag**.
 2. Enter a **Tag name** and **Definition and inclusion criteria** using the guide below.
@@ -65,6 +65,12 @@ Saving changes does not start tagging automatically. Changes to a tag's name, de
 - [Command-line usage and Python API](docs/CLI.md)
 
 The app requires Python 3.11+; `uv sync` manages the project environment. The launch command retains its original name, `research-tagger-web`.
+
+## TODOs
+
+- Support open-source models as alternatives to Jev for paper tagging.
+- Add support for more conferences.
+- Simplify Zotero setup and paper export.
 
 ## License
 
